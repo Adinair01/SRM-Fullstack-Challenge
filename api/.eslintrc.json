@@ -1,0 +1,6 @@
+{
+  "env": "node",
+  "root": "api",
+  "buildCommand": "npm ci",
+  "startCommand": "node server.js"
+}
