@@ -47,17 +47,21 @@ function TreeNode({ label, subtree, depth }) {
         {!hasChildren && (
           <span style={{ minWidth: '0.75rem', display: 'inline-block' }} />
         )}
-        <span
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.9rem',
-            fontWeight: depth === 0 ? 700 : 400,
-            color: depth === 0 ? 'var(--color-accent)' : 'var(--color-text)',
-            letterSpacing: '0.02em',
-          }}
-        >
-          {label}
-        </span>
+        <div style={{ position: 'relative' }}>
+          <span className="node-dot" />
+          <span
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.9rem',
+              fontWeight: depth === 0 ? 700 : 400,
+              color: depth === 0 ? 'var(--color-accent)' : 'var(--color-text)',
+              letterSpacing: '0.02em',
+              marginLeft: '0.75rem',
+            }}
+          >
+            {label}
+          </span>
+        </div>
         {depth === 0 && !hasChildren && (
           <span style={{ fontSize: '0.7rem', color: 'var(--color-text-dim)', marginLeft: '0.25rem' }}>
             (leaf root)

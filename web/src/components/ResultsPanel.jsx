@@ -5,7 +5,7 @@
  * Summary cards are always pinned at the top.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TreeView } from './TreeView';
 import { CycleBadge, TreeBadge } from './CycleBadge';
 
@@ -141,6 +141,37 @@ export function ResultsPanel({ result, onCopyJson, copied }) {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function SummaryCard({ label, value, color, mono }) {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    if (typeof value !== 'number') {
+      setDisplayValue(value);
+      return;
+    }
+    let start = 0;
+    const end = value;
+    if (start === end) {
+      setDisplayValue(end);
+      return;
+    }
+    const duration = 1000;
+    const startTime = performance.now();
+    
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // ease out quad
+      const easeProgress = progress * (2 - progress);
+      setDisplayValue(Math.floor(easeProgress * end));
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setDisplayValue(end);
+      }
+    };
+    requestAnimationFrame(animate);
+  }, [value]);
+
   return (
     <div className="glow-card" style={{ padding: '1rem', textAlign: 'center' }}>
       <div style={{
@@ -150,7 +181,7 @@ function SummaryCard({ label, value, color, mono }) {
         fontFamily: mono ? 'var(--font-mono)' : 'var(--font-sans)',
         lineHeight: 1.2,
       }}>
-        {value}
+        {displayValue}
       </div>
       <div style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', marginTop: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
         {label}
@@ -182,14 +213,18 @@ function HierarchiesTab({ hierarchies }) {
             gap: '0.6rem',
             marginBottom: '0.75rem',
           }}>
-            <span style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '1.05rem',
-              fontWeight: 700,
-              color: h.has_cycle ? 'var(--color-cycle)' : 'var(--color-accent)',
-            }}>
-              {h.root}
-            </span>
+            <div style={{ position: 'relative' }}>
+              {h.has_cycle && <span className="node-dot cyclic-dot" />}
+              <span className={h.has_cycle ? "node-cyclic" : ""} style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '1.05rem',
+                fontWeight: 700,
+                color: h.has_cycle ? 'var(--color-cycle)' : 'var(--color-accent)',
+                marginLeft: h.has_cycle ? '0.75rem' : '0',
+              }}>
+                {h.root}
+              </span>
+            </div>
             {h.has_cycle ? <CycleBadge /> : <TreeBadge />}
           </div>
 
@@ -244,6 +279,27 @@ function ListTab({ items, emptyMsg }) {
   );
 }
 
+function syntaxHighlight(jsonObj) {
+  if (!jsonObj) return '';
+  let json = JSON.stringify(jsonObj, null, 2);
+  json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+    let cls = 'json-number';
+    if (/^"/.test(match)) {
+      if (/:$/.test(match)) {
+        cls = 'json-key';
+      } else {
+        cls = 'json-string';
+      }
+    } else if (/true|false/.test(match)) {
+      cls = 'json-boolean';
+    } else if (/null/.test(match)) {
+      cls = 'json-null';
+    }
+    return '<span class="' + cls + '">' + match + '</span>';
+  });
+}
+
 function RawJsonTab({ result }) {
   return (
     <pre style={{
@@ -256,9 +312,7 @@ function RawJsonTab({ result }) {
       color: 'var(--color-text)',
       lineHeight: 1.6,
       maxHeight: '400px',
-    }}>
-      {JSON.stringify(result, null, 2)}
-    </pre>
+    }} dangerouslySetInnerHTML={{ __html: syntaxHighlight(result) }} />
   );
 }
 

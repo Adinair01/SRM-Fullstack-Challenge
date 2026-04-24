@@ -5,7 +5,8 @@
  * Handles copy-to-clipboard for raw JSON.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { API_BASE } from './lib/api';
 import { EdgeInput } from './components/EdgeInput';
 import { ResultsPanel } from './components/ResultsPanel';
 import { ErrorBanner } from './components/ErrorBanner';
@@ -15,6 +16,16 @@ export default function App() {
   const { status, result, error, submit, reset } = useBfhl();
   const [copied, setCopied] = useState(false);
   const [lastEdges, setLastEdges] = useState([]);
+  const [apiStatus, setApiStatus] = useState('checking');
+
+  useEffect(() => {
+    fetch(`${API_BASE}/health`)
+      .then(res => {
+        if (res.ok) setApiStatus('live');
+        else setApiStatus('error');
+      })
+      .catch(() => setApiStatus('error'));
+  }, []);
 
   const handleSubmit = useCallback(
     (edges) => {
@@ -66,11 +77,10 @@ export default function App() {
             ⬡
           </div>
           <div>
-            <h1 style={{
+            <h1 className="animated-gradient-text" style={{
               margin: 0,
               fontSize: '1.1rem',
               fontWeight: 700,
-              color: 'var(--color-text)',
               letterSpacing: '-0.01em',
             }}>
               BFHL Graph Explorer
@@ -103,10 +113,11 @@ export default function App() {
             width: '6px',
             height: '6px',
             borderRadius: '50%',
-            background: status === 'loading' ? 'var(--color-cycle)' : 'var(--color-success)',
+            background: apiStatus === 'live' ? 'var(--color-success)' : (apiStatus === 'error' ? 'var(--color-error)' : 'var(--color-cycle)'),
             display: 'inline-block',
+            boxShadow: apiStatus === 'live' ? '0 0 8px var(--color-success)' : 'none',
           }} />
-          {status === 'loading' ? 'processing' : 'ready'}
+          API: {apiStatus}
         </div>
       </header>
 
@@ -149,6 +160,44 @@ export default function App() {
           <ErrorBanner message={error} onRetry={handleRetry} />
         )}
 
+        {/* Loading state skeleton */}
+        {status === 'loading' && (
+          <section>
+            <h2 style={{
+              margin: '0 0 1rem',
+              fontSize: '0.8rem',
+              color: 'var(--color-text-muted)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              fontWeight: 500,
+            }}>
+              Analysing...
+            </h2>
+            <div className="fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="glow-card" style={{ padding: '1rem', height: '94px' }}>
+                    <div className="skeleton-box" style={{ height: '32px', width: '40%', margin: '0 auto 8px' }} />
+                    <div className="skeleton-box" style={{ height: '12px', width: '60%', margin: '0 auto' }} />
+                  </div>
+                ))}
+              </div>
+              <div>
+                <div style={{ display: 'flex', gap: '0.25rem', borderBottom: '1px solid var(--color-border)', marginBottom: '1rem', paddingBottom: '0.5rem' }}>
+                  <div className="skeleton-box" style={{ height: '32px', width: '90px' }} />
+                  <div className="skeleton-box" style={{ height: '32px', width: '70px' }} />
+                  <div className="skeleton-box" style={{ height: '32px', width: '90px' }} />
+                </div>
+                <div className="glow-card" style={{ padding: '1rem 1.25rem', height: '160px' }}>
+                  <div className="skeleton-box" style={{ height: '20px', width: '30%', marginBottom: '1.25rem' }} />
+                  <div className="skeleton-box" style={{ height: '16px', width: '20%', marginLeft: '1.5rem', marginBottom: '0.75rem' }} />
+                  <div className="skeleton-box" style={{ height: '16px', width: '40%', marginLeft: '1.5rem' }} />
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Results */}
         {status === 'success' && result && (
           <section>
@@ -181,6 +230,37 @@ export default function App() {
             <p style={{ fontSize: '0.875rem', margin: 0 }}>
               Enter directed edges above to analyse graph hierarchies.
             </p>
+            <div className="fade-up" style={{
+              marginTop: '2.5rem',
+              display: 'inline-flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              textAlign: 'left',
+              border: '1px dashed var(--color-border)',
+              padding: '1.5rem 2.5rem',
+              borderRadius: '12px',
+              position: 'relative'
+            }}>
+              <div style={{ position: 'absolute', top: '-9px', left: '20px', background: 'var(--color-bg)', padding: '0 8px', fontSize: '0.7rem', color: 'var(--color-text-dim)', fontFamily: 'var(--font-mono)' }}>Example</div>
+              <div className="tree-node-label" style={{ padding: '0.2rem 0', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                A
+              </div>
+              <div className="tree-node">
+                <div className="tree-node-label" style={{ padding: '0.2rem 0', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                  B
+                </div>
+                <div className="tree-node">
+                  <div className="tree-node-label" style={{ padding: '0.2rem 0', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                    C
+                  </div>
+                </div>
+              </div>
+              <div className="tree-node">
+                <div className="tree-node-label" style={{ padding: '0.2rem 0', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                  D
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </main>

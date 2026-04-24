@@ -133,9 +133,39 @@ or JSON: ["A->B","B->C"]`;
           </button>
         )}
 
-        <span style={{ color: 'var(--color-text-dim)', fontSize: '0.75rem', marginLeft: 'auto' }}>
-          {parseInput(raw).length > 0 && `${parseInput(raw).length} edges detected`}
-        </span>
+        {(() => {
+          const count = parseInput(raw).length;
+          if (count === 0) return null;
+          let color = 'var(--color-success)';
+          let bg = '#34d39920';
+          let border = '#065f46';
+          if (count >= 20 && count <= 40) {
+            color = 'var(--color-cycle)';
+            bg = 'var(--color-cycle-glow)';
+            border = 'var(--color-cycle-dim)';
+          } else if (count > 40) {
+            color = 'var(--color-error)';
+            bg = '#f8717120';
+            border = '#991b1b';
+          }
+          return (
+            <span style={{
+              marginLeft: 'auto',
+              color,
+              background: bg,
+              border: `1px solid ${border}`,
+              padding: '0.2rem 0.6rem',
+              borderRadius: '9999px',
+              fontSize: '0.7rem',
+              fontFamily: 'var(--font-mono)',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}>
+              {count} edges detected
+            </span>
+          );
+        })()}
       </div>
     </form>
   );
