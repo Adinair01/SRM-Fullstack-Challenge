@@ -99,8 +99,8 @@ npm test             # vitest: 23 tests, 2 suites
 
 | Service  | URL |
 |----------|-----|
-| API (Render) | `https://bfhl-api.onrender.com` |
-| Frontend (Vercel) | `https://bfhl-graph-explorer.vercel.app` |
+| API (Render) | `https://srm-bfhl-api-2zfv.onrender.com` |
+| Frontend (Vercel) | `https://srm-bfhl-app.vercel.app` |
 | GitHub Repo | `https://github.com/Adinair01/SRM-Fullstack-Challenge` |
 
 ---
