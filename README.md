@@ -1,6 +1,6 @@
 # BFHL Graph Explorer
 
-**Directed edge hierarchy analyser — SRM Full Stack Engineering Challenge**
+**Directed edge hierarchy analyser - SRM Full Stack Engineering Challenge**
 
 A full-stack submission built with Node.js, Express, React, and Vite. Feed it edge strings like `A->B`, get back structured tree hierarchies, cycle detection, depth analysis, and a clean visual breakdown.
 
