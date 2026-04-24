@@ -101,7 +101,7 @@ npm test             # vitest: 23 tests, 2 suites
 |----------|-----|
 | API (Render) | `https://bfhl-api.onrender.com` |
 | Frontend (Vercel) | `https://bfhl-graph-explorer.vercel.app` |
-| GitHub Repo | `https://github.com/adityanair/bfhl-challenge` |
+| GitHub Repo | `https://github.com/Adinair01/SRM-Fullstack-Challenge` |
 
 ---
 
